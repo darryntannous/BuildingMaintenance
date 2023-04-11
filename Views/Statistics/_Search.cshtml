@@ -1,0 +1,29 @@
+﻿
+@using BMDBConnection;
+@model BuildingMaintenance.Models.StatisticsModel
+
+@{
+    ListingTableModel listingTableModel = new ListingTableModel();
+    DynamicDropDownModel dropDownModel = new DynamicDropDownModel();
+
+    listingTableModel.Columns = new List<string>() { "Floor Name", "TotalArrearsMNT", "Contribution", "ParkingFees", "MembershipFees", "Total" };
+    listingTableModel.IsDeleteShow = false;
+    listingTableModel.IsEditShow = false;
+    listingTableModel.TableData = new List<Dictionary<string, object>>();
+    Dictionary<string, object> data = new Dictionary<string, object>();
+    foreach (var item in Model.OfficeFloorSummary)
+    {
+        data = new Dictionary<string, object>();
+        data.Add("Floor Name", Model.Floors.FirstOrDefault(x => x.FloorID == item.FloorID).FloorName);
+        data.Add("TotalArrearsMNT", item.MonthlyAmount);
+        data.Add("Contribution", item.Contribution);
+        data.Add("ParkingFees", item.ParkingFees);
+        data.Add("MembershipFees", item.MembershipFees);
+        data.Add("Total", item.Total);
+        listingTableModel.TableData.Add(data);
+    }
+
+}
+<div class="listing-sction">
+    @Html.Partial("_ListingTable", listingTableModel)
+</div>

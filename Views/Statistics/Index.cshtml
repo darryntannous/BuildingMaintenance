@@ -1,0 +1,245 @@
+﻿
+@using BMDBConnection;
+@model BuildingMaintenance.Models.StatisticsModel
+@{
+    ViewData["Title"] = "Home Page";
+    string title = "Statistics";
+    int currentMonth = DateTime.Now.Month, currentYear = DateTime.Now.Year;
+    Dictionary<string, int> months = new Dictionary<string, int>();
+    months.Add("Jan", 1);
+    months.Add("Feb", 2);
+    months.Add("Mar", 3);
+    months.Add("Apr", 4);
+    months.Add("May", 5);
+    months.Add("Jun", 6);
+    months.Add("Jul", 7);
+    months.Add("Aug", 8);
+    months.Add("Sep", 9);
+    months.Add("Oct", 10);
+    months.Add("Nov", 11);
+    months.Add("Dec", 12);
+    IEnumerable<int> years = Enumerable.Range(currentYear - 20, (21));
+
+}
+
+<div class="maincontent-holder">
+    <div class="page-title">
+        <h3>@title</h3>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-4">
+                    <div class="form-group">
+                        <label class="" for="Societies">Buildings</label>
+                        <div class="dropdown dropdown py-2 border rounded">
+                            <select onchange="DropdownChange(this)" style="font-size: 1.2rem;margin-left: 1%;width:97%;" column-name="BuildingID" column-required="true" class="dropdown-toggle btn btn btn-primary" id="BuildingID" name="BuildingID">
+                                @foreach (var item in Model.Buildings)
+                                {
+                                    <option style="background-color:white;color:black;" value="@item.BuildingID">@item.BuildingName</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group">
+                        <label class="" for="Societies">Floors</label>
+                        <div class="dropdown dropdown py-2 border rounded">
+                            <select onchange="DropdownChange(this)" style="font-size: 1.2rem;margin-left: 1%;width:97%;" column-name="FloorID" column-required="true" class="dropdown-toggle btn btn btn-primary" id="FloorID" name="FloorID">
+                                <option style="background-color: white;color:black;" value="0">-- Please Select --</option>
+                                @foreach (var item in Model.Floors)
+                                {
+                                    <option style="background-color:white;color:black;" value="@item.FloorID">@item.FloorName</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group">
+                        <label class="" for="Societies">Office Statuses</label>
+                        <div class="dropdown dropdown py-2 border rounded">
+                            <select onchange="DropdownChange(this)" style="font-size: 1.2rem;margin-left: 1%;width:97%;" column-name="OfficeStatusID" column-required="true" class="dropdown-toggle btn btn btn-primary" id="OfficeStatusID" name="OfficeStatusID">
+                                <option style="background-color: white;color:black;" value="0">-- Please Select --</option>
+                                @foreach (var item in Model.OfficeStatuses)
+                                {
+                                    if (item.OfficeStatusID == Model.OfficeStatuses.FirstOrDefault().OfficeStatusID)
+                                    {
+                                        <option style="background-color:white;color:black;" selected value="@item.OfficeStatusID">@item.StatusName</option>
+
+                                    }
+                                    else
+                                    {
+                                        <option style="background-color:white;color:black;" value="@item.OfficeStatusID">@item.StatusName</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group">
+                        <label class="" for="Societies">Month</label>
+                        <div class="dropdown dropdown py-2 border rounded">
+                            <select onchange="DropdownChange(this)" style="font-size: 1.2rem;margin-left: 1%;width:97%;" column-name="Month" column-required="true" class="dropdown-toggle btn btn btn-primary" id="Month" name="Month">
+                                <option style="background-color: white;color:black;" value="0">-- Please Select --</option>
+                                @foreach (var item in months)
+                                {
+                                    if (item.Value == currentMonth)
+                                    {
+                                        <option style="background-color:white;color:black;" selected value="@item.Value">@item.Key</option>
+                                    }
+                                    else
+                                    {
+                                        <option style="background-color:white;color:black;" value="@item.Value">@item.Key</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group">
+                        <label class="" for="Societies">Year</label>
+                        <div class="dropdown dropdown py-2 border rounded">
+                            <select onchange="DropdownChange(this)" style="font-size: 1.2rem;margin-left: 1%;width:97%;" column-name="Year" column-required="true" class="dropdown-toggle btn btn btn-primary" id="Year" name="Year">
+                                <option style="background-color: white;color:black;" value="0">-- Please Select --</option>
+                                @foreach (var item in years.OrderByDescending(x => x))
+                                {
+                                    if (item == currentYear)
+                                    {
+                                        <option style="background-color:white;color:black;" selected value="@item">@item</option>
+                                    }
+                                    else
+                                    {
+                                        <option style="background-color:white;color:black;" value="@item">@item</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col text-center">
+                <input type="button" class="btn btn-primary btn-lg" value="Search" onclick="searchSummary()" id="" />
+            </div>
+        </div>
+        <div id="searchHolder">
+        </div>
+    </div>
+    <br />
+</div>
+
+
+
+<script>
+    function searchSummary() {
+        var buildingID = $('#BuildingID').val();
+        var floorID = $('#FloorID').val();
+        var officeStatusID = $('#OfficeStatusID').val();
+        var month = $('#Month').val();
+        var year = $('#Year').val();
+        $.ajax({
+            url: "/Statistics/Search?buildingID=" + buildingID + "&floorID=" + floorID + "&officeStatusID=" + officeStatusID + "&forYear=" + year + "&month=" + month,
+            type: "GET",
+            success: function (data) {
+                $('#searchHolder').html(data);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        searchSummary();
+    });
+</script>
+
+@*<div class="row">
+        <div class="col-4">
+            <div class="form-group">
+                <label class="" for="Societies">Societies</label>
+                <div class="dropdown dropdown py-2 border rounded">
+                    <select onchange="DropdownChange(this)" style="font-size: 1.2rem;margin-left: 1%;" column-name="SocietyID" column-required="true" class="dropdown-toggle btn btn btn-primary" id="SocietyID" name="SocietyID">
+                        <option style="background-color: white;color:black;" value="0">-- Please Select --</option>
+                        @foreach (var item in Model.Societies)
+                        {
+                            <option style="background-color:white;color:black;" value="@item.SocietyID">@item.SocietyName</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="form-group">
+                <label class="" for="Societies">Buildings</label>
+                <div class="dropdown dropdown py-2 border rounded">
+                    <select onchange="DropdownChange(this)" style="font-size: 1.2rem;margin-left: 1%;" column-name="SocietyID" column-required="true" class="dropdown-toggle btn btn btn-primary" id="BuildingID" name="BuildingID">
+                        <option style="background-color: white;color:black;" value="0">-- Please Select --</option>
+                        @foreach (var item in Model.Buildings)
+                        {
+                            <option style="background-color:white;color:black;" value="@item.BuildingID">@item.BuildingName</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="form-group">
+                <label class="" for="Societies">Floors</label>
+                <div class="dropdown dropdown py-2 border rounded">
+                    <select onchange="DropdownChange(this)" style="font-size: 1.2rem;margin-left: 1%;" column-name="SocietyID" column-required="true" class="dropdown-toggle btn btn btn-primary" id="FloorID" name="FloorID">
+                        <option style="background-color: white;color:black;" value="0">-- Please Select --</option>
+                        @foreach (var item in Model.Floors)
+                        {
+                            <option style="background-color:white;color:black;" value="@item.FloorID">@item.FloorName</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-4">
+            <div class="form-group">
+                <label class="" for="Societies">Offices</label>
+                <div class="dropdown dropdown py-2 border rounded">
+                    <select onchange="DropdownChange(this)" style="font-size: 1.2rem;margin-left: 1%;" column-name="OfficeID" column-required="true" class="dropdown-toggle btn btn btn-primary" id="OfficeID" name="OfficeID">
+                        <option style="background-color: white;color:black;" value="0">-- Please Select --</option>
+                        @foreach (var item in Model.Offices)
+                        {
+                            <option style="background-color:white;color:black;" value="@item.OfficeID">@item.OfficeName</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="form-group">
+                <label class="" for="Societies">Office Statuses</label>
+                <div class="dropdown dropdown py-2 border rounded">
+                    <select onchange="DropdownChange(this)" style="font-size: 1.2rem;margin-left: 1%;" column-name="OfficeStatusID" column-required="true" class="dropdown-toggle btn btn btn-primary" id="OfficeStatusID" name="OfficeStatusID">
+                        <option style="background-color: white;color:black;" value="0">-- Please Select --</option>
+                        @foreach (var item in Model.OfficeStatuses)
+                        {
+                            <option style="background-color:white;color:black;" value="@item.OfficeStatusID">@item.StatusName</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="form-group">
+                <label class="" for="Societies">Building Users</label>
+                <div class="dropdown dropdown py-2 border rounded">
+                    <select onchange="DropdownChange(this)" style="font-size: 1.2rem;margin-left: 1%;" column-name="UserID" column-required="true" class="dropdown-toggle btn btn btn-primary" id="UserID" name="UserID">
+                        <option style="background-color: white;color:black;" value="0">-- Please Select --</option>
+                        @foreach (var item in Model.BuildingUsers)
+                        {
+                            <option style="background-color:white;color:black;" value="@item.UserID">@item.UserName</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>*@

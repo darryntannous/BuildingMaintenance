@@ -1,0 +1,20 @@
+﻿@model ApplicationUser
+@using BuildingMaintenance.Models.Entities; 
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<h1>Register</h1>
+
+<form asp-action="Register" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    @*First Name: <input name="FirstName" /><br />
+        Last Name: <input name="LastName" /><br />*@
+    User Name: <input name="UserName" value="@Model.UserName" /><br />
+    @*Display Name: <input name="DisplayName" /><br />*@
+    Email: <input name="Email" value="@Model.Email" /><br />
+    Password: <input name="Password" type="password" value="@Model.Password" /><br />
+    IsCPUser: <input id="IsCPUser" name="IsCPUser" type="checkbox" value="@(Model.IsCPUser ? "true" : "false")" @(Model.IsCPUser ? "checked" : "") /><br />
+    <input type="submit" />
+</form>

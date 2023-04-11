@@ -1,0 +1,235 @@
+﻿
+@using BMDBConnection;
+@using BuildingMaintenance.Models
+@model BuildingMaintenance.Models.BillingModel
+@{
+    ViewData["Title"] = "Home Page";
+    string title = "Billing";
+}
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.0/css/datepicker.css" rel="stylesheet" type="text/css" />
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.0/js/bootstrap-datepicker.js"></script>
+@{
+    Model.Months = new List<Months>
+{
+
+          new Months { MonthID = 1, MonthName = "Jan" },
+          new Months { MonthID = 2, MonthName = "Feb" },
+          new Months { MonthID = 3, MonthName = "Mar" },
+          new Months { MonthID = 4, MonthName = "Apr" },
+          new Months { MonthID = 5, MonthName = "May" },
+          new Months { MonthID = 6, MonthName = "Jun" },
+          new Months { MonthID = 7, MonthName = "July" },
+          new Months { MonthID = 8, MonthName = "Aug" },
+          new Months { MonthID = 9, MonthName = "Sep" },
+          new Months { MonthID = 10, MonthName = "Oct" },
+          new Months { MonthID = 11, MonthName = "Nov" },
+          new Months { MonthID = 12, MonthName = "Dec" },
+    };
+    int startYear = 2010;
+    int EndYear = DateTime.Now.Year;
+}
+<div class="maincontent-holder">
+    <div class="page-title">
+        <h3>@title</h3>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-4">
+                    <div class="form-group">
+                        <label class="" for="Societies">Month</label>
+                        <div class="dropdown dropdown py-2 border rounded">
+                            <select style="font-size: 1.2rem;margin-left: 1%;" column-name="Month" column-required="true" class="dropdown-toggle btn btn btn-primary" id="Search_Month" name="Search_Month">
+                                <option style="background-color: white;color:black;" value="0">-- Please Select --</option>
+                                @foreach (var item in Model.Months)
+                                {
+                                    if (item.MonthID == DateTime.Now.Month)
+                                    {
+                                        <option selected="selected" style="background-color:white;color:black;" value="@item.MonthID">@item.MonthName</option>
+                                    }
+                                    else
+                                    {
+                                        <option style="background-color:white;color:black;" value="@item.MonthID">@item.MonthName</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group">
+                        <label class="" for="Societies">Year</label>
+                        <div class="dropdown dropdown py-2 border rounded">
+                            <select style="font-size: 1.2rem;margin-left: 1%;" column-name="Year" column-required="true" class="dropdown-toggle btn btn btn-primary" id="Search_Year" name="Search_Year">
+                                <option style="background-color: white;color:black;" value="0">-- Please Select --</option>
+                                @for (int startingYear = EndYear; startingYear >= startYear; startingYear--)
+                                {
+                                    if (startingYear == DateTime.Now.Year)
+                                    {
+                                        <option selected="selected"  style="background-color:white;color:black;" value="@startingYear">@startingYear</option>
+                                    }
+                                    else
+                                    {
+                                        <option style="background-color:white;color:black;" value="@startingYear">@startingYear</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    <div class="form-group">
+                        <label class="" for="Societies">Offices</label>
+                        <div class="dropdown dropdown py-2 border rounded">
+                            <select style="font-size: 1.2rem;margin-left: 1%;" column-name="Office" column-required="true" class="dropdown-toggle btn btn btn-primary" id="Search_Office" name="Search_Office">
+                                <option style="background-color: white;color:black;" value="0">-- Please Select --</option>
+                                @foreach (var item in Model.Offices)
+                                {
+                                    <option style="background-color:white;color:black;" value="@item.OfficeID">@item.OfficeName</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group">
+                        <label class="" for="Societies">Buildings</label>
+                        <div class="dropdown dropdown py-2 border rounded">
+                            <select style="font-size: 1.2rem;margin-left: 1%;" column-name="Building" column-required="true" class="dropdown-toggle btn btn btn-primary" id="Search_Building" name="Search_Building">
+                                <option style="background-color: white;color:black;" value="0">-- Please Select --</option>
+                                @foreach (var item in Model.Buildings)
+                                {
+                                    <option style="background-color:white;color:black;" value="@item.BuildingID">@item.BuildingName</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-section d-flex justify-content-between mt-2">
+                <input type="button" class="btn btn-primary btn-lg" value="Search" onclick="GetData()" />
+            </div>
+        </div>
+    </div>
+    <br />
+</div>
+
+<div class="form-section" style="display:none">
+    <div class="card shadow-lg border-2 rounded-lg mt-5">
+        <div class="relative-pos">
+            <div id="form-loader" class="loading" style="display: none;"><span class="loader"></span></div>
+            <div class="card-header"><h3 class="text-center font-weight-light my-4">@title</h3></div>
+            <div class="card-body">
+                @using (Html.BeginForm("SaveUpdateRecord", "Dynamic", FormMethod.Post, new { id = "form_createrecord" }))
+                {
+                    <section section="officefloordetails" id="section_officefloordetails" rows="1" displayseqno="1">
+                        <input rel-primarykey="true" style="display:none" type="text" id="officefloordetails-OfficeFloorDetailID" name="officefloordetails-OfficeFloorDetailID" value="" isnewrecord="" />
+                        <div class="form-group"  style="display:none">
+                            <label class="" for="OfficeNo">OfficeFloorID</label>
+                            <input style="" class="form-control py-4" type="text" id="officefloordetails-OfficeFloorID" name="officefloordetails-OfficeFloorID" value="" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="" for="OfficeNo">Monthly Amount</label>
+                            <input column-name="MonthlyAmount" type="text" class="form-control py-4" disabled id="officefloordetails-MonthlyAmount" name="officefloordetails-MonthlyAmount" value="">
+                        </div>
+                        <div class="form-group">
+                            <label class="" for="OfficeNo">Paid Date</label>
+                            <div id="datepicker" class="input-group date" data-date-format="mm-dd-yyyy">
+                                <input column-name="PaidDate" class="form-control py-4" type="text" readonly id="officefloordetails-PaidDate" name="officefloordetails-PaidDate" value="" />
+                                <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="" for="OfficeNo">Contribution</label>
+                            <input column-name="Contribution" type="text" class="form-control py-4" id="officefloordetails-Contribution" name="officefloordetails-Contribution" value="">
+                        </div>
+                        <div class="form-group">
+                            <label class="" for="OfficeNo">Parking Fees</label>
+                            <input column-name="ParkingFees" type="number" class="form-control py-4" id="officefloordetails-ParkingFees" name="officefloordetails-ParkingFees" value="">
+                        </div>
+                        <div class="form-group container">
+                            <div class="row">
+                                <div class="col-3">
+                                    <label class="" for="OfficeNo">Year</label>
+                                    <div class="dropdown dropdown py-2 border rounded">
+                                        <select style="font-size: 1.2rem;margin-left: 1%;width:95%;" column-name="ForYear" column-required="true" class="dropdown-toggle btn btn btn-primary" id="officefloordetails-ForYear" name="officefloordetails-ForYear">
+                                            @for (int startingYear = EndYear; startingYear >= startYear; startingYear--)
+                                            {
+                                                <option style="background-color:white;color:black;" value="@startingYear">@startingYear</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <label class="" for="OfficeNo">Month</label>
+                                    <div class="dropdown dropdown py-2 border rounded">
+                                        <select style="font-size: 1.2rem;margin-left: 1%;width:95%;" column-name="Month" column-required="true" class="dropdown-toggle btn btn btn-primary" id="officefloordetails-Month" name="officefloordetails-Month">
+                                            @foreach (var item in Model.Months)
+                                            {
+                                                <option style="background-color:white;color:black;" value="@item.MonthID">@item.MonthName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                }
+            </div>
+            <div class="card-footer text-center">
+                <div class="header-section d-flex justify-content-between mt-2">
+                    <input type="button" class="btn btn-primary btn-lg" value="Submit" onclick="SubmitItem()" id="Submit" />
+                    <input type="button" class="btn btn-warning btn-lg" value="Cancel" onclick="CloseForm('form-section', 'addupdate-btn')" id="Cancel" />
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="ContentForBilling">
+
+</div>
+<script>
+    var MonthID = 0;
+    var OfficeID = 0;
+    var Year = 0;
+    var BuildingID = 0;
+    function GetData() {
+        $.ajax({
+            type: "GET",
+            url: '/statistics/getbillingdata?MonthID=' + $('#Search_Month').val() + '&Year=' + $('#Search_Year').val() + '&OfficeID=' + $('#Search_Office').val() + '&BuildingID=' + $('#Search_Building').val()
+        })
+            .done(function (data) {
+                $("#ContentForBilling").empty();
+                $("#ContentForBilling").html(data);
+            })
+    }
+    function SetDropDownValue(item, DropdownName) {
+        if (DropdownName == 'Building') {
+            BuildingID = $(item).val();
+        }
+        else if (DropdownName == 'Office') {
+            OfficeID = $(item).val();
+        }
+        else if (DropdownName == 'Year') {
+            Year = $(item).val();
+        }
+        else if (DropdownName == 'Months') {
+            MonthID = $(item).val();
+        }
+    }
+    $("#datepicker").datepicker({
+        autoclose: true,
+        todayHighlight: true,
+        format: 'yyyy-mm-dd'
+    }).datepicker('update', new Date());
+
+    $(document).ready(function () {
+        GetData();
+    });
+</script>

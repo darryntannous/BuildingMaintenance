@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "Login";
+    string email = "qaiser@gmail.com";
+    string title = "Login";
+}
+
+<div class="card shadow-lg border-2 rounded-lg mt-5">
+    <div class="relative-pos">
+        <div id="form-loader" class="loading" style="display: none;"><span class="loader"></span></div>
+        <div class="card-header"><h3 class="text-center font-weight-light my-4">@title</h3></div>
+        <form action="Login" method="post">
+            <div class="card-body">
+                <div class="form-group">
+                    <label class="" for="inputEmailAddress">Email</label>
+                    <input class="form-control py-4" id="email" name="email" type="email" placeholder="Enter email address">
+                </div>
+                <div class="form-group">
+                    <label class="" for="inputPassword">Password</label>
+                    <input class="form-control py-4" id="password" name="password" type="password" placeholder="Enter password">
+                </div>
+            </div>
+            <div class="card-footer text-center">
+                <div class="form-group align-items-center justify-content-between mt-4 mb-0">
+                    <input style="padding: 1.375rem 2.75rem;" onclick="showloader()" class="btn btn-primary" type="submit" value="Login" />
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<script>
+    function showloader() {
+        $('#form-loader').show();
+    }
+</script>

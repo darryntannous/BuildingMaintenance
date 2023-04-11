@@ -1,0 +1,59 @@
+﻿@using BuildingMaintenance.Models
+@model HomeModel 
+@{
+    ViewData["Title"] = "Home Page";
+    string currentData = Model.CurrentDate.ToString("MMMM-yyyy");
+    var currentRecord = Model.OfficeFloorDetails.FirstOrDefault(x => x.ForYear == Model.CurrentDate.Year && x.Month == Model.CurrentDate.Month);
+    var previousRecord = Model.OfficeFloorDetails.FirstOrDefault(x => x.ForYear == Model.CurrentDate.AddMonths(-1).Year && x.Month == Model.CurrentDate.AddMonths(-1).Month);
+}
+
+    <main>
+        <br />
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-xl-3 col-md-6">
+                    <div class="card bg-primary text-white mb-4">
+                        <div class="card-body">
+                            <span class="font-weight-bold">Collected Amount Of @currentData</span>
+                        </div>
+                        <div class="card-footer d-flex align-items-center justify-content-between">
+                            <span class="d-flex justify-content-center">@String.Format("{0:0.00}", currentRecord != null ? currentRecord.MonthlyAmount  : 0)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card bg-primary text-white mb-4">
+                        <div class="card-body">
+                            <span class="font-weight-bold">Collected Amount Of @Model.CurrentDate.AddMonths(-1).ToString("MMMM-yyyy")</span>
+                        </div>
+                        <div class="card-footer d-flex align-items-center justify-content-between">
+                            <span class="d-flex justify-content-center">@String.Format("{0:0.00}", previousRecord != null ? previousRecord.MonthlyAmount : 0)</span>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="col-xl-3 col-md-6">
+                    <div class="card bg-primary text-white mb-4">
+                        <div class="card-body">
+                            <span class="font-weight-bold">Registered Offices</span>
+                        </div>
+                        <div class="card-footer d-flex align-items-center justify-content-between">
+                            <span class="d-flex justify-content-center">@String.Format("{0}", Model.NoOfOffices)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card bg-primary text-white mb-4">
+                        <div class="card-body">
+                            <span class="font-weight-bold">UnPaid Offices Of @currentData</span>
+                        </div>
+                        <div class="card-footer d-flex align-items-center justify-content-between">
+                            <span class="d-flex justify-content-center">@String.Format("{0}", Model.UnPaidNoOfOffices)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>

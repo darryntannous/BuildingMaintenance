@@ -1,0 +1,104 @@
+﻿
+@using BMDBConnection;
+@model BuildingMaintenance.Models.OfficeModel
+@{
+    ViewData["Title"] = "Home Page";
+    string title = "Office";
+    office office = Model.IsNewRecord ? new office() : Model.Offices.FirstOrDefault(x => x.OfficeID == Model.OfficeID);
+    office = office ?? new office();
+    string hide = string.Empty, buttonCenter = string.Empty;
+    ListingTableModel listingTableModel = new ListingTableModel();
+    DynamicDropDownModel dropDownModel = new DynamicDropDownModel();
+
+    if (Model.IsNewRecord)
+    {
+        hide = "display:none";
+        buttonCenter = "d-flex";
+        listingTableModel.Columns = new List<string>() { "OfficeID", "Office Name", "User Name", "Office Status", "Grand Total" };
+        listingTableModel.TableName = "Offices";
+        listingTableModel.PrimaryColumn = "OfficeID";
+        listingTableModel.EditURL = "/office/index/";
+        listingTableModel.TableData = new List<Dictionary<string, object>>();
+        Dictionary<string, object> data = new Dictionary<string, object>();
+        foreach (var item in Model.Offices)
+        {
+            DropDownData user = Model.User.DropDownData.FirstOrDefault(x => (int)x.Value == item.UserID);
+            DropDownData officestatus = Model.OfficeStatuses.DropDownData.FirstOrDefault(x => (short)x.Value == item.OfficeStatusID);
+            data = new Dictionary<string, object>();
+            data.Add("OfficeID", item.OfficeID);
+            data.Add("Office Name", item.OfficeName);
+            data.Add("User Name", user != null ? user.DisplayText : item.UserID.ToString());
+            data.Add("Office StatusID", officestatus != null ? officestatus.DisplayText : item.OfficeStatusID.ToString());
+            data.Add("Grand Total", item.GrandTotal);
+            listingTableModel.TableData.Add(data);
+        }
+    }
+}
+
+@{
+    ViewData["Title"] = "Index";
+}
+<style>
+    
+</style>
+<div class="maincontent-holder">
+    <div class="header-section d-flex justify-content-between mt-4">
+        <div class="page-title">
+            <h3>@title</h3>
+        </div>
+        <div class="addupdate-btn" style="@(Model.IsNewRecord ? string.Empty : "display:none")">
+            <button class="btn btn-primary" onclick="ToggleContent('form-section', 'addupdate-btn')" value="Add Item">Add Item</button>
+        </div>
+    </div>
+    <div class="form-section" style="@hide">
+        <div class="card shadow-lg border-2 rounded-lg mt-5">
+            <div class="relative-pos">
+                <div id="form-loader" class="loading" style="display: none;"><span class="loader"></span></div>
+                <div class="card-header"><h3 class="text-center font-weight-light my-4">@title</h3></div>
+                <div class="card-body">
+                    @using (Html.BeginForm("SaveUpdateRecord", "Dynamic", FormMethod.Post, new { id = "form_createrecord" }))
+                    {
+                        <section section="Offices" rows="1" displayseqno="1">
+                            <input rel-primarykey="true" style="display:none" type="text" id="Offices-OfficeID" name="Offices-OfficeID" value="@Model.OfficeID" isnewrecord="@(Model.IsNewRecord ? "1" : "0")" />
+                            <div class="form-group">
+                                <label class="" for="OfficeName">Office Name</label>
+                                <input column-name="OfficeName" column-required="true" type="text" class="form-control py-4" id="Offices-OfficeName" name="Offices-OfficeName" value="@office.OfficeName">
+                            </div>
+                            <div class="form-group">
+                                @Html.Partial("_DropDown", Model.User)
+                            </div>
+                            <div class="form-group">
+                                @Html.Partial("_DropDown", Model.OfficeStatuses)
+                            </div>
+                            @*<div class="form-group">
+                                <label class="" for="OfficeContactNo">Grand Total</label>
+                                <input column-name="GrandTotal" type="number" class="form-control py-4" id="Offices-GrandTotal" name="Offices-GrandTotal" value="@(office.GrandTotal.HasValue ? office.GrandTotal.Value : 0)">
+                            </div>*@
+                        </section>
+                    }
+                </div>
+                <div class="card-footer text-center">
+                    <div class="header-section d-flex justify-content-between mt-2">
+                        <input type="button" class="btn btn-primary btn-lg" value="Submit" onclick="SubmitItem()" id="Submit" />
+                        @if (Model.IsNewRecord)
+                        {
+                            <input type="button" class="btn btn-warning btn-lg" value="Cancel" onclick="CloseForm('form-section', 'addupdate-btn')" id="Cancel" />
+                        }
+                        else
+                        {
+                            <a href="/office/index" class="btn btn-warning btn-lg">Back To Main</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+    @if (Model.IsNewRecord)
+    {
+        <div class="listing-sction">
+            @Html.Partial("_ListingTable", listingTableModel)
+        </div>
+    }
+</div>
+

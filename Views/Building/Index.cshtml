@@ -1,0 +1,113 @@
+﻿
+@using BMDBConnection;
+@model BuildingMaintenance.Models.BuildingModel
+@{
+    ViewData["Title"] = "Home Page";
+    string title = "Building";
+    building building = Model.IsNewRecord ? new building() : Model.Buildings.FirstOrDefault(x => x.BuildingID == Model.BuildingID);
+    building = building ?? new building();
+    string hide = string.Empty, buttonCenter = string.Empty;
+    ListingTableModel listingTableModel = new ListingTableModel();
+    DynamicDropDownModel dropDownModel = new DynamicDropDownModel();
+
+    if (Model.IsNewRecord)
+    {
+        hide = "display:none";
+        buttonCenter = "d-flex";
+        listingTableModel.Columns = new List<string>() { "BuildingID", "BuildingName", "SocietyID", "IsActive", "ParkingAvailable", "ContractNo" };
+        listingTableModel.TableName = "Buildings";
+        listingTableModel.PrimaryColumn = "BuildingID";
+        listingTableModel.EditURL = "/building/index/";
+        listingTableModel.TableData = new List<Dictionary<string, object>>();
+        Dictionary<string, object> data = new Dictionary<string, object>();
+        foreach (var item in Model.Buildings)
+        {
+            data = new Dictionary<string, object>();
+            data.Add("BuildingID", item.BuildingID);
+            data.Add("BuildingName", item.BuildingName);
+            data.Add("SocietyID", item.SocietyID);
+            data.Add("IsActive", item.IsActive);
+            data.Add("ParkingAvailable", item.ParkingAvailable);
+            data.Add("ContractNo", item.ContactNo);
+
+            listingTableModel.TableData.Add(data);
+        }
+    }
+}
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+    <div class="maincontent-holder">
+        <div class="header-section d-flex justify-content-between mt-4">
+            <div class="page-title">
+                <h3>@title</h3>
+            </div>
+            <div class="addupdate-btn" style="@(Model.IsNewRecord ? string.Empty : "display:none")">
+                <button class="btn btn-primary" onclick="ToggleContent('form-section', 'addupdate-btn')" value="Add Item">Add Item</button>
+            </div>
+        </div>
+        <div class="form-section" style="@hide">
+            <div class="card shadow-lg border-2 rounded-lg mt-5">
+                <div class="relative-pos">
+                    <div id="form-loader" class="loading" style="display: none;"><span class="loader"></span></div>
+                    <div class="card-header"><h3 class="text-center font-weight-light my-4">@title</h3></div>
+                    <div class="card-body">
+                        @using (Html.BeginForm("SaveUpdateRecord", "Dynamic", FormMethod.Post, new { id = "form_createrecord" }))
+                        {
+                            <section section="Buildings" rows="1" displayseqno="1">
+                                <input rel-primarykey="true" style="display:none" type="text" id="Buildings-BuildingID" name="Buildings-BuildingID" value="@Model.BuildingID" isnewrecord="@(Model.IsNewRecord ? "1" : "0")" />
+                                <div class="form-group">
+                                    <label class="" for="BuildingName">Building Name</label>
+                                    <input column-name="BuildingName" column-required="true" type="text" class="form-control py-4" id="Buildings-BuildingName" name="Buildings-BuildingName" value="@building.BuildingName">
+                                </div>
+                                <div class="form-group">
+                                    @Html.Partial("_DropDown", Model.Societies)
+                                </div>
+                                <div class="form-group">
+                                    <div class="custom-control custom-checkbox">
+                                        <input class="custom-control-input" column-required="true" column-isstringcolumn="0" type="checkbox" value="" id="Buildings-IsActive" @(building.IsActive ? "checked" : string.Empty) name="Buildings-IsActive">
+                                        <label class="custom-control-label" for="Buildings-IsActive">IsActive</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="custom-control custom-checkbox">
+                                        <input class="custom-control-input" column-isstringcolumn="0" type="checkbox" value="" id="Buildings-ParkingAvailable" @(building.ParkingAvailable ? "checked" : string.Empty) name="Buildings-ParkingAvailable">
+                                        <label class="custom-control-label" for="Buildings-ParkingAvailable">Parking Available</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="" for="ContactNo">Contract No</label>
+                                    <input column-name="ContactNo" type="number" class="form-control py-4" id="Buildings-ContactNo" name="Buildings-ContactNo" value="@building.ContactNo">
+                                </div>
+                            </section>
+
+                        }
+                    </div>
+                    <div class="card-footer text-center">
+                        <div class="header-section d-flex justify-content-between mt-2">
+                            <input type="button" class="btn btn-primary btn-lg" value="Submit" onclick="SubmitItem()" id="Submit" />
+                            @if (Model.IsNewRecord)
+                            {
+                                <input type="button" class="btn btn-warning btn-lg" value="Cancel" onclick="CloseForm('form-section', 'addupdate-btn')" id="Cancel" />
+                            }
+                            else
+                            {
+                                <a href="/building/index" class="btn btn-warning btn-lg">Back To Main</a>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <br />
+        @if (Model.IsNewRecord)
+        {
+            <div class="listing-sction">
+                @Html.Partial("_ListingTable", listingTableModel)
+            </div>
+        }
+    </div>
+

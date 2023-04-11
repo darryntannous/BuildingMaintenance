@@ -1,0 +1,108 @@
+﻿
+@using BMDBConnection;
+@model BuildingMaintenance.Models.BillingModel
+@{
+    ViewData["Title"] = "Home Page";
+    Model.Months = new List<Months>
+{
+
+          new Months { MonthID = 1, MonthName = "Jan" },
+          new Months { MonthID = 2, MonthName = "Feb" },
+          new Months { MonthID = 3, MonthName = "Mar" },
+          new Months { MonthID = 4, MonthName = "Apr" },
+          new Months { MonthID = 5, MonthName = "May" },
+          new Months { MonthID = 6, MonthName = "Jun" },
+          new Months { MonthID = 7, MonthName = "July" },
+          new Months { MonthID = 8, MonthName = "Aug" },
+          new Months { MonthID = 9, MonthName = "Sep" },
+          new Months { MonthID = 10, MonthName = "Oct" },
+          new Months { MonthID = 11, MonthName = "Nov" },
+          new Months { MonthID = 12, MonthName = "Dec" },
+    };
+}
+
+<style>
+    .validateErrorBorder {
+        border: solid 3px #FF0000;
+    }
+</style>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fas fa-table mr-1"></i>
+        DataTable Example
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="listingTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>OfficeID</th>
+                        <th>BuildingID</th>
+                        <th>FloorID</th>
+                        <th>Month-Year</th>
+                        <th>Payment</th>
+                        <th>Action</th>
+                        <th>Delte</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.BillingData)
+                    {
+                        var office = Model.Offices.FirstOrDefault(x => x.OfficeID == item.OfficeID);
+                        var building = Model.Buildings.FirstOrDefault(x => x.BuildingID == item.BUILDINGID);
+                        var floor = Model.Floors.FirstOrDefault(x => x.FloorID == item.FloorID);
+
+                    <tr>
+                        <td>@(office != null ? office.OfficeName : item.OfficeID.ToString())</td>
+                        <td>@(building != null ? building.BuildingName : item.BUILDINGID.ToString())</td>
+                        <td>@(floor != null ? floor.FloorName : item.FloorID.ToString())</td>
+                        @{
+                            var isPaid = !string.IsNullOrEmpty(item.PaidDate) ? "Paid" : "Not Paid";
+                            var buttonValue = isPaid == "Paid" ? "Edit" : "Add";
+                            var Date = !string.IsNullOrEmpty(item.PaidDate) ? DateTime.Parse(item.PaidDate).ToString("yyyy-MM-dd") : DateTime.Now.ToString("yyyy-MM-dd");
+                            var Contribution = !string.IsNullOrEmpty(item.PaidDate) ? item.CONTRIBUTION : 0;
+                            var ParkingFees = !string.IsNullOrEmpty(item.PaidDate) ? item.PARKINGFEES : 0;
+                            var MonthID = !string.IsNullOrEmpty(item.PaidDate) ? item.MONTH : DateTime.Now.Month;
+                            var ForYear = !string.IsNullOrEmpty(item.PaidDate) ? item.FORYEAR : DateTime.Now.Year;
+                        }
+                    <td>@(item.MONTH.HasValue && item.MONTH > 0 ? Model.Months.FirstOrDefault(x => x.MonthID == item.MONTH.Value).MonthName : "-") @(item.FORYEAR.HasValue && item.FORYEAR > 0 ? item.FORYEAR.ToString() : "-")</td>
+                        <td>@isPaid</td>
+                        <td class="mt-10"> <button class="btn btn-primary" onclick="SetValues('@item.OfficeFloorDetailID' , '@item.OfficeFloorID' , '@item.MonthlyAmount' , '@Date' , '@Contribution' , '@ParkingFees' , '@ForYear' , '@MonthID')" value="@buttonValue">@buttonValue</button></td>
+
+                        @if (item.OfficeFloorDetailID.HasValue)
+                        {
+                            <td class="mt-10"><button onclick="RecordDelete('officefloordetails', 'OfficeFloorDetailID', '@item.OfficeFloorDetailID')" class="badge badge-danger"><i class="fa fa-trash"></i> Delete</button></td>
+                        }
+                        else
+                        {
+                            <td>-</td>
+                        }
+
+                    </tr>
+                    }
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $('#listingTable').DataTable();
+    });
+    function SetValues(OfficeFloorDetailID, OfficeFloorID, MonthlyAmount, PaidDate, Contribution, ParkingFees, ForYear, Month) {
+        var IsNew = OfficeFloorDetailID  ? 0 : 1;
+        $('#officefloordetails-OfficeFloorDetailID').val(OfficeFloorDetailID)
+        $('#officefloordetails-OfficeFloorID').val(OfficeFloorID)
+        $('#officefloordetails-MonthlyAmount').val(MonthlyAmount)
+        $('#officefloordetails-PaidDate').val(PaidDate)
+        $('#officefloordetails-Contribution').val(Contribution)
+        $('#officefloordetails-ParkingFees').val(ParkingFees)
+        $('#officefloordetails-ForYear').val(ForYear)
+        $('#officefloordetails-Month').val(Month)
+        $('#officefloordetails-OfficeFloorDetailID').attr('isnewrecord', IsNew)
+        ToggleContent('form-section', 'addupdate-btn')
+    }
+</script>
+

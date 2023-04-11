@@ -1,0 +1,26 @@
+﻿@using BMDBConnection;
+@model BuildingMaintenance.Models.DynamicDropDownModel
+
+<label class="" for="@Model.TableName">@Model.PrimaryColumnID</label>
+<div class="dropdown dropdown py-2 border rounded">
+    <select onchange="DropdownChange(this)" style="font-size: 1.2rem;margin-left: 1%;width:97%;" column-name="@Model.PrimaryColumnID" column-required="true" class="dropdown-toggle btn btn btn-primary" id="@string.Format("{0}-{1}", Model.TableName, Model.PrimaryColumnID)" name="@string.Format("{0}-{1}", Model.TableName, Model.PrimaryColumnID)">
+        <option style="background-color: white;color:black;" value="0">-- Please Select --</option>
+        @foreach (var item in Model.DropDownData)
+        {
+            if (Model.PrimaryColumnValue != null && item.Value.ToString() == Model.PrimaryColumnValue.ToString())
+            {
+                <option rel-1="@item.Attribute1" style="background-color: white; color: black; " selected="selected" value="@item.Value">@item.DisplayText</option>
+            }
+            else
+            {
+                <option rel-1="@item.Attribute1" style="background-color:white;color:black;" value="@item.Value">@item.DisplayText</option>
+            }
+        }
+    </select>
+</div>
+
+<script>
+    function DropdownChange(element) {
+        debugger;
+    }
+</script>
